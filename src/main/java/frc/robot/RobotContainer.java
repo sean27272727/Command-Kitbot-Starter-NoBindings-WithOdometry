@@ -58,7 +58,7 @@ public class RobotContainer {
                 () -> -m_driverController.getLeftY(), () -> -m_driverController.getRightX()));
 
         /* TO DO: Add bindings here */
-        m_driverController.a().onTrue(m_intake.runIntakeCommand());
+        m_driverController.a().toggleOnTrue(getAutonomousCommand());
     }
 
     /**
@@ -67,7 +67,7 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        return Autos.driveDistance(m_driveSubsystem);
+        return Autos.shoot(m_intake, m_loader, m_flywheel);
+        // return Autos.driveDistance(m_driveSubsystem);
     }
-    
 }
