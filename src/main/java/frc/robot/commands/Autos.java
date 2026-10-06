@@ -27,29 +27,41 @@ public final class Autos {
     /** Drive a fixed distance
      * 
      */
-    public static Command driveDistance(DriveSubsystem driveSubsystem) {
+    public static Command driveDistance(DriveSubsystem driveSubsystem, double targetDistance) {
         return Commands.sequence(
             driveSubsystem.resetEncoderCommand(),
             driveSubsystem.arcadeDriveCommand(()->0.4, ()->0.0)
-                .until(() -> driveSubsystem.getAverageDistanceMeters() > AutoConstants.kDistanceTargetMeters)
+                .until(() -> driveSubsystem.getAverageDistanceMeters() > targetDistance)
                 .finallyDo(() -> driveSubsystem.stopMotors())
         );
     }
 
-    public static Command shoot(IntakeClass intake, Loader loader, Flywheel flywheel){
+    public static Command reverseDriveDistance(DriveSubsystem driveSubsystem, double targetDistance) {
+        return Commands.sequence(
+            driveSubsystem.resetEncoderCommand(),
+            driveSubsystem.arcadeDriveCommand(()->-0.4, ()->0.0)
+                .until(() -> driveSubsystem.getAverageDistanceMeters() < -targetDistance)
+                .finallyDo(() -> driveSubsystem.stopMotors())
+        );
+    }
+
+    public static Command shoot(DriveSubsystem driveSubsystem, double targetDisatnce, IntakeClass intake, Loader loader, Flywheel flywheel){
         // boolean speedEqualsTarget = (flywheel.getShooterSpeedRPM() == (double)IOConstants.kFlywheelDefaultTargetRPM);
         // BooleanSupplier supplier = () -> speedEqualsTarget;
         return Commands.deadline(
             Commands.sequence(
+                reverseDriveDistance(driveSubsystem, targetDisatnce),
                 Commands.waitSeconds(3),
                 // Commands.waitUntil(supplier),
                 Commands.deadline(
                     Commands.waitSeconds(10),
                     intake.runIntakeCommand(),
-                    loader.runToFlywheelCommand()),
-                flywheel.stopShooterCommand()
+                    loader.runToFlywheelCommand())
             ),
-            flywheel.runShooterCommand()
+            Commands.sequence(
+                flywheel.increaseShooterSpeedCommand(),
+                flywheel.runShooterCommand()
+            )
         );
     }
 
