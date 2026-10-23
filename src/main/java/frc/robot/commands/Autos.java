@@ -45,24 +45,40 @@ public final class Autos {
         );
     }
 
-    public static Command shoot(DriveSubsystem driveSubsystem, double targetDisatnce, IntakeClass intake, Loader loader, Flywheel flywheel){
-        // boolean speedEqualsTarget = (flywheel.getShooterSpeedRPM() == (double)IOConstants.kFlywheelDefaultTargetRPM);
-        // BooleanSupplier supplier = () -> speedEqualsTarget;
-        return Commands.deadline(
-            Commands.sequence(
-                reverseDriveDistance(driveSubsystem, targetDisatnce),
-                Commands.waitSeconds(3),
-                // Commands.waitUntil(supplier),
-                Commands.deadline(
-                    Commands.waitSeconds(10),
-                    intake.runIntakeCommand(),
-                    loader.runToFlywheelCommand())
-            ),
-            Commands.sequence(
-                flywheel.increaseShooterSpeedCommand(),
-                flywheel.runShooterCommand()
-            )
-        );
+    // public static Command shoot(DriveSubsystem driveSubsystem, IntakeClass intake, Loader loader, Flywheel flywheel){
+    //     // boolean speedEqualsTarget = (flywheel.getShooterSpeedRPM() == (double)IOConstants.kFlywheelDefaultTargetRPM);
+    //     // BooleanSupplier supplier = () -> speedEqualsTarget;
+    //     return Commands.deadline(
+    //         Commands.sequence(
+    //             reverseDriveDistance(driveSubsystem, 2.0),
+    //             Commands.waitSeconds(3),
+    //             // Commands.waitUntil(supplier),
+    //             Commands.deadline(
+    //                 Commands.waitSeconds(10),
+    //                 intake.runIntakeCommand(),
+    //                 loader.runToFlywheelCommand())
+    //         ),
+    //         Commands.sequence(
+    //             flywheel.increaseShooterSpeedCommand(),
+    //             flywheel.runShooterCommand()
+    //         )
+    //     );
+    // }
+
+    // //public static Command autoCommand(DriveSubsystem driveSubsystem, double forwardDistance, double backDistance, IntakeClass intake, Loader loader, Flywheel flywheel){
+    //     return Commands.deadline(
+    //         Commands.sequence(
+    //             Commands.waitSeconds(2),
+    //             reverseDriveDistance(driveSubsystem, forwardDistance),
+    //             Commands.deadline(
+    //                 Commands.waitSeconds(10),
+    //                 shoot(intake, loader, flywheel))),
+    //         intake.runIntakeCommand()
+    //     );
+    // }
+
+    public static Command autoCommand(DriveSubsystem driveSubsystem, IntakeClass intake, Loader loader, Flywheel flywheel){
+        return new ShootCommand(driveSubsystem, intake, loader, flywheel);
     }
 
     private Autos() {
