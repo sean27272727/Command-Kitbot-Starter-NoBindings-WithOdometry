@@ -17,6 +17,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
@@ -25,6 +26,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -131,6 +133,29 @@ public class DriveSubsystem extends SubsystemBase {
 
     public Command stopDriveCommand() {
         return runOnce( () -> this.stopMotors() );
+    }
+
+    /** Turns 180 degrees from the heading at command start, then stops. */
+    public Command turn180Command() {
+        PIDController turnController = new PIDController(0.01, 0.0, 0.0);
+        turnController.setTolerance(2.0);
+        final double[] targetYawDegrees = new double[1];
+
+        return new FunctionalCommand(
+            () -> {
+                targetYawDegrees[0] = m_pigeon2.getYaw().getValueAsDouble() + 180.0;
+                turnController.reset();
+            },
+            () -> {
+                double output = turnController.calculate(
+                    m_pigeon2.getYaw().getValueAsDouble(), targetYawDegrees[0]);
+                output = Math.max(-0.5, Math.min(0.5, output));
+                m_differentialDrive.arcadeDrive(0.0, output);
+            },
+            interrupted -> stopMotors(),
+            turnController::atSetpoint,
+            this
+        ).withName("Turn 180 Degrees");
     }
 
     public Command resetEncoderCommand() {
@@ -322,7 +347,5 @@ public class DriveSubsystem extends SubsystemBase {
     public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
     }
-
-
    
 }
