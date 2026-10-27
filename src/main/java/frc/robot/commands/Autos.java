@@ -30,7 +30,7 @@ public final class Autos {
     public static Command driveDistance(DriveSubsystem driveSubsystem, double targetDistance) {
         return Commands.sequence(
             driveSubsystem.resetEncoderCommand(),
-            driveSubsystem.arcadeDriveCommand(()->0.4, ()->0.0)
+            driveSubsystem.arcadeDriveCommand(()->0.5, ()->0.0)
                 .until(() -> driveSubsystem.getAverageDistanceMeters() > targetDistance)
                 .finallyDo(() -> driveSubsystem.stopMotors())
         );
@@ -39,7 +39,7 @@ public final class Autos {
     public static Command reverseDriveDistance(DriveSubsystem driveSubsystem, double targetDistance) {
         return Commands.sequence(
             driveSubsystem.resetEncoderCommand(),
-            driveSubsystem.arcadeDriveCommand(()->-0.4, ()->0.0)
+            driveSubsystem.arcadeDriveCommand(()->-0.5, ()->0.0)
                 .until(() -> driveSubsystem.getAverageDistanceMeters() < -targetDistance)
                 .finallyDo(() -> driveSubsystem.stopMotors())
         );
@@ -77,8 +77,17 @@ public final class Autos {
     //     );
     // }
 
-    public static Command autoCommand(DriveSubsystem driveSubsystem, IntakeClass intake, Loader loader, Flywheel flywheel){
-        return new ShootCommand(driveSubsystem, intake, loader, flywheel);
+    public static Command autoCommand(DriveSubsystem driveSubsystem, double forwardDistance, IntakeClass intake, Loader loader, Flywheel flywheel){
+        return Commands.sequence(
+            Commands.deadline(
+                Commands.waitSeconds(5),
+                driveDistance(driveSubsystem, forwardDistance),
+                intake.runIntakeCommand()),
+            Commands.waitSeconds(1),
+            driveSubsystem.turn180Command().withTimeout(3),
+            Commands.waitSeconds(1),
+            new ShootCommand(driveSubsystem, intake, loader, flywheel).withTimeout(10)
+            );
     }
 
     private Autos() {

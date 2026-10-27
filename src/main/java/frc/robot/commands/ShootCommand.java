@@ -18,8 +18,7 @@ public class ShootCommand extends Command{
     public ShootCommand(DriveSubsystem driveSubsystem, IntakeClass intake, Loader loader, Flywheel flywheel){
         m_shootSequenceCommand = Commands.deadline(
             Commands.sequence(
-                Commands.waitSeconds(3),
-                // Commands.waitUntil(supplier),
+                Commands.waitSeconds(2),
                 Commands.deadline(
                     Commands.waitSeconds(10),
                     intake.runIntakeCommand(),

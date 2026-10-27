@@ -149,7 +149,7 @@ public class DriveSubsystem extends SubsystemBase {
             () -> {
                 double output = turnController.calculate(
                     m_pigeon2.getYaw().getValueAsDouble(), targetYawDegrees[0]);
-                output = Math.max(-0.5, Math.min(0.5, output));
+                output = Math.max(-0.69, Math.min(0.69, output));
                 m_differentialDrive.arcadeDrive(0.0, output);
             },
             interrupted -> stopMotors(),
